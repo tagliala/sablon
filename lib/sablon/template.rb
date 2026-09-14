@@ -66,9 +66,24 @@ module Sablon
       # process files
       process(env)
       #
-      Zip::OutputStream.write_buffer(StringIO.new) do |out|
-        generate_output_file(out, @document.zip_contents)
+      # rubyzip 3.x enables Zip64 for writing by default, flagging every
+      # entry with the Zip64 version (45) and placeholder sizes. OOXML
+      # consumers such as Microsoft Word, Google Docs and Colore reject
+      # docx archives with Zip64 entries, so Zip64 support is switched off
+      # for the output archive. Templates are never large enough to need it.
+      with_zip64_support_disabled do
+        Zip::OutputStream.write_buffer(StringIO.new) do |out|
+          generate_output_file(out, @document.zip_contents)
+        end
       end
+    end
+
+    def with_zip64_support_disabled
+      previous = ::Zip.write_zip64_support
+      ::Zip.write_zip64_support = false
+      yield
+    ensure
+      ::Zip.write_zip64_support = previous
     end
 
     # Processes all of the entries searching for ones that match the pattern.
