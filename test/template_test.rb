@@ -9,7 +9,7 @@ class SablonTemplateTest < Sablon::TestCase
     @rendered_document = Sablon.template(template_path).render_to_string(
       fruits: [{ name: "Piña" }],
       cars: [{ name: "Camión" }]
-    )
+    ).b
   end
 
   def test_small_entries_do_not_use_zip64_in_local_or_central_headers
@@ -39,7 +39,7 @@ class SablonTemplateTest < Sablon::TestCase
         refute_empty binary_entries
 
         binary_entries.each do |entry|
-          assert_equal input.read(entry.name), output.read(entry.name), entry.name
+          assert_equal input.read(entry.name).b, output.read(entry.name).b, entry.name
         end
       end
     end
